@@ -1,0 +1,19 @@
+require 'net/http'
+
+calendar = File.join File.dirname(__FILE__), 'calendar'
+
+namespace :download do
+  desc '下载农历文本数据'
+  task :lunar do
+    FileUtils.mkdir_p calendar
+    1901.upto(2100) do |year|
+      puts "Download for year #{year}"
+      Net::HTTP.start('data.weather.gov.hk') do |http|
+        resp = http.get("/gts/time/calendar/text/T#{year}c.txt")
+        open(File.join(calendar, "#{year}.txt"), 'wb') do |file|
+          file.write resp.body.force_encoding('big5').encode('utf-8')
+        end
+      end
+    end
+  end
+end
